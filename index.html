@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Journey to Mars - An Interactive Odyssey through space, time, and human ambition.">
+<title>ARES-I | Journey to Mars</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap">
+
+<link rel="stylesheet" href="assets/css/main.css?v=20260328-2">
+</head>
+<body>
+
+<!-- ---------------------------------------
+     CUSTOM CURSOR
+--------------------------------------- -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- ---------------------------------------
+     MISSION LOADER
+--------------------------------------- -->
+<div id="loader" role="status" aria-label="Loading mission">
+  <div class="loader-hud">
+    <div class="loader-grid">
+      <div class="loader-top-bar">
+        <span class="loader-mission-id">MISSION // ARES-I</span>
+        <span class="loader-status blink">* INITIALIZING</span>
+      </div>
+      <div class="loader-rocket-wrap">
+        <div class="loader-rocket" id="loaderRocket">
+          <div class="rocket-body-load">
+            <div class="rb-nose"></div>
+            <div class="rb-window"></div>
+            <div class="rb-mid"></div>
+            <div class="rb-fin-l"></div>
+            <div class="rb-fin-r"></div>
+            <div class="rb-exhaust" id="loadExhaust"></div>
+          </div>
+        </div>
+      </div>
+      <div class="loader-progress-wrap">
+        <div class="loader-bar-outer"><div class="loader-bar-fill" id="loaderBar"></div></div>
+        <div class="loader-counter" id="loaderCounter">0%</div>
+      </div>
+      <div class="loader-checklist" id="loaderChecklist">
+        <div class="chk-item" data-delay="200">OK Trajectory Computed</div>
+        <div class="chk-item" data-delay="600">OK Life Support Online</div>
+        <div class="chk-item" data-delay="1000">OK Engines Armed</div>
+        <div class="chk-item" data-delay="1400">OK LAUNCH WINDOW OPEN</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ---------------------------------------
+     STAR CANVAS (FIXED BG)
+--------------------------------------- -->
+<canvas id="space-canvas" aria-hidden="true"></canvas>
+
+<!-- ---------------------------------------
+     MISSION HUD (FIXED OVERLAY)
+--------------------------------------- -->
+<div id="mission-hud" aria-label="Mission Status HUD">
+  <div class="hud-left">
+    <div class="hud-logo">ARES<span>-I</span></div>
+    <div class="hud-mission-day">
+      <span class="hud-label">MISSION DAY</span>
+      <span class="hud-value" id="hudDay">001</span>
+    </div>
+  </div>
+  <div class="hud-center">
+    <div class="hud-progress-bar">
+      <div class="hud-progress-fill" id="hudProgress"></div>
+      <div class="hud-progress-pct" id="hudProgressPct">0%</div>
+    </div>
+    <div class="hud-stages">
+      <span class="hud-stage" data-section="0">EARTH</span>
+      <span class="hud-stage" data-section="1">CREW</span>
+      <span class="hud-stage" data-section="2">LAUNCH</span>
+      <span class="hud-stage" data-section="3">SPACE</span>
+      <span class="hud-stage" data-section="4">APPROACH</span>
+      <span class="hud-stage" data-section="5">CONTROL</span>
+      <span class="hud-stage" data-section="6">LANDING</span>
+      <span class="hud-stage" data-section="7">EXPLORE</span>
+      <span class="hud-stage" data-section="8">LAB</span>
+      <span class="hud-stage" data-section="9">RESULTS</span>
+    </div>
+  </div>
+  <div class="hud-right">
+    <div class="hud-velocity">
+      <span class="hud-label">VELOCITY</span>
+      <span class="hud-value" id="hudVelocity">0</span>
+      <span class="hud-unit">km/s</span>
+    </div>
+    <button id="tourToggle" class="hud-sound-btn hud-tour-btn" aria-label="Start guided tour">
+      TOUR
+    </button>
+    <button id="soundToggle" class="hud-sound-btn" aria-label="Toggle ambient sound">
+      <span id="soundIcon">OFF</span>
+    </button>
+  </div>
+</div>
+
+<div id="tourOverlay" class="tour-overlay" aria-live="polite">
+  <div class="tour-card">
+    <span class="tour-step" id="tourStepLabel">Segment 1 / 7</span>
+    <h3 id="tourTitle">Opening Mission Brief</h3>
+    <p id="tourBody">A focused cinematic pass through your strongest moments.</p>
+    <div class="tour-progress"><i id="tourProgressBar"></i></div>
+    <button id="tourStopBtn" class="edl-replay-btn" type="button">Stop Tour</button>
+  </div>
+</div>
+
+<!-- ---------------------------------------
+     SIDE NAV DOTS
+--------------------------------------- -->
+<nav id="side-nav" aria-label="Section navigation">
+  <a href="#s-hero"    class="nav-dot active" data-label="Pre-Launch"  aria-label="Pre-Launch"></a>
+  <a href="#s-launch"  class="nav-dot"        data-label="Launch"      aria-label="Launch"></a>
+  <a href="#s-space"   class="nav-dot"        data-label="Deep Space"  aria-label="Deep Space"></a>
+  <a href="#s-approach"class="nav-dot"        data-label="Approach"    aria-label="Approach"></a>
+  <a href="#s-landing" class="nav-dot"        data-label="Landing"     aria-label="Landing"></a>
+  <a href="#s-explore" class="nav-dot"        data-label="Exploration" aria-label="Exploration"></a>
+  <a href="#s-lab"     class="nav-dot"        data-label="Mission Lab" aria-label="Mission Lab"></a>
+</nav>
+
+<!-- ---------------------------------------
+     SECTION 1 - PRE-LAUNCH / EARTH
+--------------------------------------- -->
+<section id="s-hero" class="chapter" data-chapter="0">
+  <div class="earth-atmosphere"></div>
+  <div class="earth-glow"></div>
+  
+  <div class="hero-grid">
+    <div class="hero-left">
+      <div class="reveal-item" data-delay="0">
+        <span class="overline">KENNEDY SPACE CENTER - 2031</span>
+      </div>
+      <h1 class="hero-title reveal-item" data-delay="100">
+        <span class="title-line t1">Journey</span>
+        <span class="title-line t2">to</span>
+        <span class="title-line t3">Mars</span>
+      </h1>
+      <p class="hero-body reveal-item" data-delay="200">
+        For sixty years, humanity has looked at that dim red star and whispered 
+        <em>"someday."</em> Today, ARES-I ignites its engines and makes 
+        someday <strong>now.</strong>
+      </p>
+      <div class="hero-stats reveal-item" data-delay="300">
+        <div class="hstat">
+          <span class="hstat-n" data-target="225">0</span>
+          <span class="hstat-u">M km</span>
+          <span class="hstat-l">Distance to Mars</span>
+        </div>
+        <div class="hstat">
+          <span class="hstat-n" data-target="7">0</span>
+          <span class="hstat-u">months</span>
+          <span class="hstat-l">Travel Time</span>
+        </div>
+        <div class="hstat">
+          <span class="hstat-n" data-target="4">0</span>
+          <span class="hstat-u">crew</span>
+          <span class="hstat-l">Astronauts</span>
+        </div>
+      </div>
+      <a href="#s-launch" class="cta-btn reveal-item" data-delay="400" aria-label="Begin journey">
+        <span class="cta-label">INITIATE SEQUENCE</span>
+        <span class="cta-arrow">&gt;</span>
+      </a>
+    </div>
+
+    <div class="hero-right reveal-item" data-delay="150">
+      <div class="earth-scene">
+        <div class="earth-sphere" id="earthSphere">
+          <div class="earth-cloud c1"></div>
+          <div class="earth-cloud c2"></div>
+          <div class="earth-cloud c3"></div>
+          <div class="earth-shine"></div>
+        </div>
+        <div class="orbit-ring r1"></div>
+        <div class="orbit-ring r2"></div>
+        <div class="satellite" id="satDot"></div>
+        <div class="iss-badge">
+          <span class="iss-label">ISS ORBIT</span>
+          <span class="iss-alt">408 km</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-indicator reveal-item" data-delay="600" aria-label="Scroll to continue">
+    <span class="si-text">SCROLL TO LAUNCH</span>
+    <div class="si-line"></div>
+    <div class="si-arrow">v</div>
+  </div>
+
+  <div class="data-ticker" aria-label="Mission data">
+    <span>T-00:00:00 LAUNCH IMMINENT</span>
+    <span>FUEL: 100%</span>
+    <span>TRAJECTORY: OPTIMAL</span>
+    <span>CREW: READY</span>
+    <span>MARS WINDOW: OPEN</span>
+  </div>
+</section>
+
+<!-- ================================================
+     SECTION 1 - CREW BRIEFING & BIOMETRICS
+================================================ -->
+<section id="s-crew" class="chapter crew-section" data-chapter="1">
+  <div class="crew-bg-accent" aria-hidden="true"></div>
+  
+  <div class="crew-content">
+    <div class="crew-header reveal-item" data-delay="0">
+      <span class="overline">MISSION TEAM - CREWED SPACECRAFT</span>
+      <h2 class="chapter-title">The Crew<br><em>Ready to Fly.</em></h2>
+      <p class="chapter-body" style="max-width:720px">
+        Four pioneers. Twenty years of training. Decades of ancestral dreams. 
+        Every heartbeat, oxygen level, and neural marker is monitored in real-time. 
+        They are humanity's best. They are ready.
+      </p>
+    </div>
+
+    <!-- Crew Biometrics Grid -->
+    <div class="crew-grid reveal-item" data-delay="150">
+      <!-- Crew Member 1 -->
+      <div class="crew-card crew-commander">
+        <div class="cc-image">
+          <div class="cc-avatar" aria-hidden="true">►</div>
+        </div>
+        <div class="cc-info">
+          <div class="cc-name">Commander Priya Nair</div>
+          <div class="cc-role">Mission Commander</div>
+          <div class="cc-experience">15 years • 3 Missions</div>
+        </div>
+        <div class="cc-biometrics">
+          <div class="bio-row">
+            <span class="bio-label">❤ Heart Rate</span>
+            <span class="bio-value" id="crew0-heart">72</span>
+            <span class="bio-unit">bpm</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-label">O₂ Saturation</span>
+            <span class="bio-value" id="crew0-o2">98</span>
+            <span class="bio-unit">%</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-label">Stress Level</span>
+            <span class="bio-value" id="crew0-stress">LOW</span>
+            <span class="bio-unit"></span>
+          </div>
+        </div>
+        <div class="bio-graph" id="crew0-graph"></div>
+      </div>
+
+      <!-- Crew Member 2 -->
+      <div class="crew-card crew-pilot">
+        <div class="cc-image">
+          <div class="cc-avatar" aria-hidden="true">✈</div>
+        </div>
+        <div class="cc-info">
+          <div class="cc-name">Dr. James Chen</div>
+          <div class="cc-role">Pilot / Mission Specialist</div>
+          <div class="cc-experience">12 years • 2 Missions</div>
+        </div>
+        <div class="cc-biometrics">
+          <div class="bio-row">
+            <span class="bio-label">❤ Heart Rate</span>
+            <span class="bio-value" id="crew1-heart">68</span>
+            <span class="bio-unit">bpm</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-label">O₂ Saturation</span>
+            <span class="bio-value" id="crew1-o2">99</span>
+            <span class="bio-unit">%</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-label">Stress Level</span>
+            <span class="bio-value" id="crew1-stress">CALM</span>
+            <span class="bio-unit"></span>
+          </div>
+        </div>
+        <div class="bio-graph" id="crew1-graph"></div>
+      </div>
+
+      <!-- Crew Member 3 -->
+      <div class="crew-card crew-scientist">
+        <div class="cc-image">
+          <div class="cc-avatar" aria-hidden="true">🔬</div>
+        </div>
+        <div class="cc-info">
+          <div class="cc-name">Dr. Amara Okonkwo</div>
+          <div class="cc-role">Chief Scientist</div>
+          <div class="cc-experience">18 years • 4 Missions</div>
+        </div>
+        <div class="cc-biometrics">
+          <div class="bio-row">
+            <span class="bio-label">❤ Heart Rate</span>
+            <span class="bio-value" id="crew2-heart">70</span>
+            <span class="bio-unit">bpm</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-label">O₂ Saturation</span>
+            <span class="bio-value" id="crew2-o2">98</span>
+            <span class="bio-unit">%</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-label">Stress Level</span>
+            <span class="bio-value" id="crew2-stress">ENGAGED</span>
+            <span class="bio-unit"></span>
+          </div>
+        </div>
+        <div class="bio-graph" id="crew2-graph"></div>
+      </div>
+
+      <!-- Crew Member 4 -->
+      <div class="crew-card crew-engineer">
+        <div class="cc-image">
+          <div class="cc-avatar" aria-hidden="true">⚙</div>
+        </div>
+        <div class="cc-info">
+          <div class="cc-name">Marcus Thompson</div>
+          <div class="cc-role">Chief Engineer</div>
+          <div class="cc-experience">14 years • 3 Missions</div>
+        </div>
+        <div class="cc-biometrics">
+          <div class="bio-row">
+            <span class="bio-label">❤ Heart Rate</span>
+            <span class="bio-value" id="crew3-heart">71</span>
+            <span class="bio-unit">bpm</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-label">O₂ Saturation</span>
+            <span class="bio-value" id="crew3-o2">97</span>
+            <span class="bio-unit">%</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-label">Stress Level</span>
+            <span class="bio-value" id="crew3-stress">READY</span>
+            <span class="bio-unit"></span>
+          </div>
+        </div>
+        <div class="bio-graph" id="crew3-graph"></div>
+      </div>
+    </div>
+
+    <div class="crew-footer reveal-item" data-delay="300">
+      <p class="crew-closing">
+        Biometric readings nominal. All systems green. Crew psychology at peak readiness. 
+        <strong>Ready to proceed to pre-launch checklist.</strong>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     PRE-LAUNCH CHECKLIST MINI-GAME (Modal)
+================================================ -->
+<div id="prelaunchModal" class="modal prelaunch-modal" role="alertdialog" aria-modal="true">
+  <div class="modal-backdrop"></div>
+  <div class="modal-content prelaunch-content">
+    <div class="pl-header">
+      <h3>T-10 MINUTES: PRE-LAUNCH VERIFICATION</h3>
+      <div class="pl-progress">
+        <div class="pl-progress-bar" id="checklistProgress"></div>
+      </div>
+      <span id="checklistStatus">0/4 Complete</span>
+    </div>
+
+    <div class="pl-checklist">
+      <!-- Check 1: Tank Pressure -->
+      <div class="pl-item" id="check1">
+        <div class="pli-title">⚙ Tank Pressure Calibration</div>
+        <div class="pli-desc">Verify fuel tank pressure: <strong>1500-1600 PSI</strong></div>
+        <div class="pli-game">
+          <input type="range" id="pressureSlider" min="1000" max="2000" value="1200" class="pressure-slider">
+          <div class="pressure-readout">
+            <span id="pressureValue">1200</span> PSI
+          </div>
+        </div>
+        <div class="pli-hint">Drag slider to match target range</div>
+      </div>
+
+      <!-- Check 2: Battery Sequence -->
+      <div class="pl-item" id="check2">
+        <div class="pli-title">🔋 Battery Activation Sequence</div>
+        <div class="pli-desc">Click the batteries in order: <strong>A → B → C</strong></div>
+        <div class="pli-game battery-sequence">
+          <button class="bat-btn" data-index="0" data-correct="0">A</button>
+          <button class="bat-btn" data-index="1" data-correct="1">B</button>
+          <button class="bat-btn" data-index="2" data-correct="2">C</button>
+          <div class="seq-display" id="seqDisplay">-</div>
+        </div>
+        <div class="pli-hint">Correct sequence: A, B, C</div>
+      </div>
+
+      <!-- Check 3: Communication Frequencies -->
+      <div class="pl-item" id="check3">
+        <div class="pli-title">📡 Communication Lock</div>
+        <div class="pli-desc">Match the pattern: <strong>🟢 🔵 🔴 🟡</strong></div>
+        <div class="pli-game pattern-match">
+          <div class="pattern-display" id="patternDisplay"></div>
+          <div class="pattern-buttons">
+            <button class="pat-btn" data-color="green" style="background:#2ecc71">●</button>
+            <button class="pat-btn" data-color="blue" style="background:#3498db">●</button>
+            <button class="pat-btn" data-color="red" style="background:#e74c3c">●</button>
+            <button class="pat-btn" data-color="yellow" style="background:#ffd60a">●</button>
+          </div>
+        </div>
+        <div class="pli-hint">Remember the sequence and click in order</div>
+      </div>
+
+      <!-- Check 4: Confirm Launch -->
+      <div class="pl-item" id="check4">
+        <div class="pli-title">🚀 Final Confirmation</div>
+        <div class="pli-desc">Ready for launch sequence</div>
+        <div class="pli-game final-confirm">
+          <button id="launchConfirmBtn" class="confirm-btn" disabled>CONFIRM LAUNCH</button>
+          <span class="confirm-status" id="confirmStatus">Complete all checks first</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pl-footer">
+      <p id="checklistMsg">Complete all verification checks to proceed</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================
+     CRISIS EVENT MODAL
+================================================ -->
+<div id="crisisModal" class="modal crisis-modal" role="alertdialog" aria-modal="true">
+  <div class="modal-backdrop"></div>
+  <div class="modal-content crisis-content">
+    <div class="crisis-header">
+      <div class="crisis-alert-icon">⚠</div>
+      <h3 id="crisisTitle">SYSTEM ANOMALY</h3>
+      <span class="crisis-time">T+--:--</span>
+    </div>
+
+    <div class="crisis-body">
+      <p id="crisisDescription">An unexpected event has occurred.</p>
+      <p id="crisisImpact" style="font-size: 12px; opacity: 0.7; margin-top: 8px;">Impact: Unknown</p>
+    </div>
+
+    <div class="crisis-choices">
+      <button id="crisisChoice1" class="crisis-btn choice-1">CHOICE A</button>
+      <button id="crisisChoice2" class="crisis-btn choice-2">CHOICE B</button>
+    </div>
+
+    <div class="crisis-footer" id="crisisFooter"></div>
+  </div>
+</div>
+
+<!-- ================================================
+     SECTION 2 - LAUNCH (Updated numbering)
+================================================ -->
+<section id="s-launch" class="chapter" data-chapter="2">
+  <div class="launch-bg"></div>
+  <div class="launch-shockwave" id="shockwave"></div>
+  
+  <div class="launch-content">
+    <div class="launch-left">
+      <span class="overline reveal-item" data-delay="0">T+00:02:30 - MAIN ENGINE CUTOFF</span>
+      <h2 class="chapter-title reveal-item" data-delay="100">
+        <em>Ignition.</em><br>The Earth<br>Lets Go.
+      </h2>
+      <p class="chapter-body reveal-item" data-delay="200">
+        3.6 million kilograms of thrust compress into a single, 
+        earth-shaking moment. In 8.5 minutes, ARES-I pierces the 
+        Karman line at 100km - the boundary of space. 
+        The atmosphere burns orange at 1,600 deg C around the fairing.
+      </p>
+      <div class="launch-data-grid reveal-item" data-delay="300">
+        <div class="ldata-card">
+          <span class="ldc-val">3.6M</span>
+          <span class="ldc-label">kg Thrust</span>
+        </div>
+        <div class="ldata-card">
+          <span class="ldc-val">8.5</span>
+          <span class="ldc-label">min to Orbit</span>
+        </div>
+        <div class="ldata-card">
+          <span class="ldc-val">100</span>
+          <span class="ldc-label">km Karman Line</span>
+        </div>
+        <div class="ldata-card">
+          <span class="ldc-val">1,600</span>
+          <span class="ldc-label">Heat Shield deg C</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="launch-right">
+      <div class="rocket-scene" id="rocketScene">
+        <div class="rocket-wrap" id="rocketWrap">
+          <!-- SVG Rocket -->
+          <svg class="rocket-svg" viewBox="0 0 120 320" xmlns="http://www.w3.org/2000/svg" aria-label="ARES-I Rocket">
+            <!-- Body -->
+            <defs>
+              <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#c8d6e5"/>
+                <stop offset="40%" stop-color="#f0f4f8"/>
+                <stop offset="70%" stop-color="#dde8f0"/>
+                <stop offset="100%" stop-color="#8fa8c0"/>
+              </linearGradient>
+              <linearGradient id="noseGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#b0c4d8"/>
+                <stop offset="50%" stop-color="#e8f0f8"/>
+                <stop offset="100%" stop-color="#8099b0"/>
+              </linearGradient>
+              <linearGradient id="engineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#445566"/>
+                <stop offset="100%" stop-color="#223344"/>
+              </linearGradient>
+              <linearGradient id="flameGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
+                <stop offset="20%" stop-color="#ffdd44"/>
+                <stop offset="50%" stop-color="#ff6600"/>
+                <stop offset="100%" stop-color="#ff2200" stop-opacity="0"/>
+              </linearGradient>
+              <filter id="flameBlur">
+                <feGaussianBlur stdDeviation="2.5"/>
+              </filter>
+              <filter id="glowFilter">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <!-- Nose cone -->
+            <path d="M60,5 L45,60 L75,60 Z" fill="url(#noseGrad)"/>
+            <!-- Main body -->
+            <rect x="42" y="58" width="36" height="160" rx="3" fill="url(#bodyGrad)"/>
+            <!-- USA stripe -->
+            <rect x="42" y="110" width="36" height="4" fill="#c1440e" opacity="0.8"/>
+            <!-- Window -->
+            <circle cx="60" cy="90" r="10" fill="#112233" stroke="#8099b0" stroke-width="2"/>
+            <circle cx="60" cy="90" r="6" fill="#001833" opacity="0.8"/>
+            <ellipse cx="57" cy="87" rx="2" ry="3" fill="rgba(150,200,255,0.3)" transform="rotate(-20,57,87)"/>
+            <!-- NASA badge area -->
+            <rect x="46" y="130" width="28" height="18" rx="2" fill="rgba(0,30,60,0.4)" stroke="rgba(100,160,220,0.3)" stroke-width="0.5"/>
+            <text x="60" y="143" text-anchor="middle" font-size="7" fill="rgba(150,200,255,0.8)" font-family="monospace">ARES-I</text>
+            <!-- Engine section -->
+            <path d="M42,218 L35,240 L85,240 L78,218 Z" fill="url(#engineGrad)"/>
+            <!-- Engine nozzles -->
+            <ellipse cx="50" cy="242" rx="8" ry="4" fill="#1a2a3a"/>
+            <ellipse cx="60" cy="245" rx="8" ry="4" fill="#1a2a3a"/>
+            <ellipse cx="70" cy="242" rx="8" ry="4" fill="#1a2a3a"/>
+            <!-- Fins left -->
+            <path d="M42,200 L15,248 L42,240 Z" fill="#b0c4d8"/>
+            <path d="M42,200 L20,240 L42,230 Z" fill="#8099b0"/>
+            <!-- Fins right -->
+            <path d="M78,200 L105,248 L78,240 Z" fill="#b0c4d8"/>
+            <path d="M78,200 L100,240 L78,230 Z" fill="#8099b0"/>
+            <!-- Engine glow -->
+            <ellipse cx="50" cy="242" rx="7" ry="3" fill="#ff8800" opacity="0.6" filter="url(#flameBlur)"/>
+            <ellipse cx="60" cy="245" rx="7" ry="3" fill="#ff6600" opacity="0.6" filter="url(#flameBlur)"/>
+            <ellipse cx="70" cy="242" rx="7" ry="3" fill="#ff8800" opacity="0.6" filter="url(#flameBlur)"/>
+            <!-- Flame -->
+            <g id="rocketFlame" class="flame-anim">
+              <ellipse cx="50" cy="260" rx="6" ry="22" fill="url(#flameGrad)" opacity="0.9" filter="url(#flameBlur)"/>
+              <ellipse cx="60" cy="265" rx="7" ry="28" fill="url(#flameGrad)" opacity="0.95" filter="url(#flameBlur)"/>
+              <ellipse cx="70" cy="260" rx="6" ry="22" fill="url(#flameGrad)" opacity="0.9" filter="url(#flameBlur)"/>
+              <ellipse cx="55" cy="258" rx="3" ry="16" fill="rgba(255,255,255,0.7)" filter="url(#flameBlur)"/>
+              <ellipse cx="65" cy="260" rx="3" ry="18" fill="rgba(255,255,255,0.6)" filter="url(#flameBlur)"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="launch-platform">
+          <div class="lp-tower"></div>
+          <div class="lp-base"></div>
+          <div class="exhaust-cloud" id="exhaustCloud">
+            <div class="ec-puff p1"></div>
+            <div class="ec-puff p2"></div>
+            <div class="ec-puff p3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Countdown overlay that fades out -->
+  <div class="countdown-overlay" id="countdownOverlay">
+    <div class="countdown-num" id="countdownNum">3</div>
+  </div>
+</section>
+
+<!-- ---------------------------------------
+     SECTION 4 - DEEP SPACE
+--------------------------------------- -->
+<section id="s-space" class="chapter dark-section" data-chapter="3">
+  
+  <div class="space-content">
+    <div class="space-header reveal-item" data-delay="0">
+      <span class="overline">DAY 47 - 12,500,000 KM FROM EARTH</span>
+      <h2 class="chapter-title">
+        The Void<br><em>Between Worlds</em>
+      </h2>
+    </div>
+
+    <div class="space-split">
+      <div class="space-main reveal-item" data-delay="100">
+        <p class="chapter-body">
+          Adrift in the interplanetary medium. Earth is now a pale dot of blue light 
+          behind you - indistinguishable from the stars. Ahead, Mars glows faintly orange. 
+          At 28 km/s, the crew hurtles through absolute silence - 
+          no air, no sound, no gravity. Only the math of orbital mechanics 
+          and 280,000 lines of navigation code stand between life and the eternal cold.
+        </p>
+        <div class="space-facts">
+          <div class="sf-item reveal-item" data-delay="150">
+            <div class="sf-icon">SOLAR</div>
+            <div class="sf-text">
+              <strong>Solar Radiation</strong>
+              <span>16x Earth surface level. Magnetic shielding active.</span>
+            </div>
+          </div>
+          <div class="sf-item reveal-item" data-delay="200">
+            <div class="sf-icon">TEMP</div>
+            <div class="sf-text">
+              <strong>External Temperature</strong>
+              <span>-270 deg C in shadow. +120 deg C in sunlight.</span>
+            </div>
+          </div>
+          <div class="sf-item reveal-item" data-delay="250">
+            <div class="sf-icon">COMMS</div>
+            <div class="sf-text">
+              <strong>Signal Delay</strong>
+              <span>23 minutes one-way. No real-time mission control.</span>
+            </div>
+          </div>
+          <div class="sf-item reveal-item" data-delay="300">
+            <div class="sf-icon">HEALTH</div>
+            <div class="sf-text">
+              <strong>Bone Density</strong>
+              <span>1% lost per month. 2h daily exercise mandatory.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="solar-system-viz reveal-item" data-delay="200">
+        <div class="ssv-title">CURRENT POSITION</div>
+        <div class="ssv-canvas-wrap">
+          <canvas id="orbitCanvas" width="340" height="340" aria-label="Orbital position diagram"></canvas>
+        </div>
+        <div class="ssv-legend">
+          <span class="ssl-item ssl-earth">E Earth</span>
+          <span class="ssl-item ssl-ares">A ARES-I</span>
+          <span class="ssl-item ssl-mars">M Mars</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive planet comparison -->
+    <div class="planet-compare reveal-item" data-delay="100">
+      <div class="pc-title">
+        <span class="pc-label">EARTH</span>
+        <span class="pc-vs">vs</span>
+        <span class="pc-label pc-mars">MARS</span>
+      </div>
+      <div class="pc-bars" id="pcBars">
+        <div class="pc-row">
+          <span class="pc-cat">Gravity</span>
+          <div class="pc-bar-wrap">
+            <div class="pc-bar earth-bar" style="--w:100%"><span>9.8 m/s2</span></div>
+            <div class="pc-bar mars-bar"  style="--w:38%"><span>3.7 m/s2</span></div>
+          </div>
+        </div>
+        <div class="pc-row">
+          <span class="pc-cat">Day Length</span>
+          <div class="pc-bar-wrap">
+            <div class="pc-bar earth-bar" style="--w:100%"><span>24h</span></div>
+            <div class="pc-bar mars-bar"  style="--w:102.7%"><span>24h 37m</span></div>
+          </div>
+        </div>
+        <div class="pc-row">
+          <span class="pc-cat">Temperature</span>
+          <div class="pc-bar-wrap">
+            <div class="pc-bar earth-bar" style="--w:75%"><span>+15 deg C avg</span></div>
+            <div class="pc-bar mars-bar"  style="--w:15%"><span>-60 deg C avg</span></div>
+          </div>
+        </div>
+        <div class="pc-row">
+          <span class="pc-cat">Atmosphere</span>
+          <div class="pc-bar-wrap">
+            <div class="pc-bar earth-bar" style="--w:100%"><span>1 atm O2</span></div>
+            <div class="pc-bar mars-bar"  style="--w:7%"><span>0.006 atm CO2</span></div>
+          </div>
+        </div>
+        <div class="pc-row">
+          <span class="pc-cat">Surface Area</span>
+          <div class="pc-bar-wrap">
+            <div class="pc-bar earth-bar" style="--w:100%"><span>510M km2</span></div>
+            <div class="pc-bar mars-bar"  style="--w:57%"><span>145M km2</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="floating-earth" id="floatingEarth" aria-hidden="true">
+    <div class="fe-sphere">
+      <div class="fe-cloud fc1"></div>
+      <div class="fe-cloud fc2"></div>
+    </div>
+    <span class="fe-label">HOME - 12.5M KM</span>
+  </div>
+
+</section>
+
+<!-- ---------------------------------------
+     SECTION 5 - MARS APPROACH
+--------------------------------------- -->
+<section id="s-approach" class="chapter dark-section" data-chapter="4">
+
+  <div class="approach-content">
+    <div class="approach-left">
+      <span class="overline reveal-item" data-delay="0">DAY 203 - 48 HOURS TO MARS ORBIT</span>
+      <h2 class="chapter-title reveal-item" data-delay="100">
+        Red Planet<br><em>Rising.</em>
+      </h2>
+      <p class="chapter-body reveal-item" data-delay="200">
+        After 203 days, the cameras no longer show a dot - they show a world. 
+        Olympus Mons, three times the height of Everest. Valles Marineris, 
+        a canyon system that would stretch from New York to Los Angeles. 
+        Automated systems fire the retro-burn engine. Mars begins its gravitational embrace.
+      </p>
+
+      <div class="approach-milestones reveal-item" data-delay="300">
+        <div class="milestone active">
+          <div class="ms-dot"></div>
+          <div class="ms-text">
+            <strong>Trans-Mars Injection</strong>
+            <span>Day 0 - left Earth orbit</span>
+          </div>
+        </div>
+        <div class="ms-line"></div>
+        <div class="milestone active">
+          <div class="ms-dot"></div>
+          <div class="ms-text">
+            <strong>Solar Conjunction</strong>
+            <span>Day 89 - comm blackout for 16 days</span>
+          </div>
+        </div>
+        <div class="ms-line"></div>
+        <div class="milestone active">
+          <div class="ms-dot"></div>
+          <div class="ms-text">
+            <strong>Mars Orbit Insertion</strong>
+            <span>Day 205 - burn in T-48h</span>
+          </div>
+        </div>
+        <div class="ms-line"></div>
+        <div class="milestone">
+          <div class="ms-dot upcoming"></div>
+          <div class="ms-text upcoming">
+            <strong>Descent &amp; Landing</strong>
+            <span>Day 207 - Jezero Crater</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="approach-right reveal-item" data-delay="200">
+      <div class="mars-scene">
+        <div class="mars-glow-ring r1" aria-hidden="true"></div>
+        <div class="mars-glow-ring r2" aria-hidden="true"></div>
+        <div class="mars-sphere" id="marsSphere">
+          <div class="mars-surface-detail msd1"></div>
+          <div class="mars-surface-detail msd2"></div>
+          <div class="mars-surface-detail msd3"></div>
+          <div class="mars-polar-cap north"></div>
+          <div class="mars-polar-cap south"></div>
+          <div class="mars-shine"></div>
+          <div class="mars-landmark ol" id="mlOlympus">
+            <div class="ml-dot"></div>
+            <div class="ml-line"></div>
+            <div class="ml-label">Olympus Mons<br><em>21.9 km</em></div>
+          </div>
+          <div class="mars-landmark vm" id="mlValles">
+            <div class="ml-dot"></div>
+            <div class="ml-line"></div>
+            <div class="ml-label">Valles Marineris<br><em>4,000 km</em></div>
+          </div>
+          <div class="mars-landmark jz" id="mlJezero">
+            <div class="ml-dot pulse-dot"></div>
+            <div class="ml-line"></div>
+            <div class="ml-label landing-target">Jezero Crater<br><em>LANDING ZONE</em></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="approach-data-strip reveal-item" data-delay="400">
+    <div class="ads-item">
+      <span class="ads-label">DISTANCE TO MARS</span>
+      <span class="ads-value" id="adsDistance">48,000</span>
+      <span class="ads-unit">km</span>
+    </div>
+    <div class="ads-sep">|</div>
+    <div class="ads-item">
+      <span class="ads-label">APPROACH VELOCITY</span>
+      <span class="ads-val2">2.4</span>
+      <span class="ads-unit">km/s</span>
+    </div>
+    <div class="ads-sep">|</div>
+    <div class="ads-item">
+      <span class="ads-label">ORBITAL INSERTION</span>
+      <span class="ads-val2 blink-green">T-47:23:08</span>
+    </div>
+    <div class="ads-sep">|</div>
+    <div class="ads-item">
+      <span class="ads-label">SYSTEM STATUS</span>
+      <span class="ads-val2" style="color:#00ff88">ALL GREEN</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SECTION 6 - MISSION CONTROL TELEMETRY CENTER
+================================================ -->
+<section id="s-control" class="chapter control-section" data-chapter="5">
+  <div class="control-bg-grid" aria-hidden="true"></div>
+  
+  <div class="control-content">
+    <div class="control-header reveal-item" data-delay="0">
+      <span class="overline">REAL-TIME MISSION CRITICAL SYSTEMS</span>
+      <h2 class="chapter-title">Mission Control<br><em>Telemetry.</em></h2>
+      <p class="chapter-body" style="max-width:680px">
+        As ARES-I enters orbital insertion burn, ground stations monitor 47 critical systems 
+        in real-time. Every gauge, every number, every heartbeat is tracked. One anomaly. 
+        One decision that could change everything.
+      </p>
+    </div>
+
+    <!-- Telemetry Dashboard Grid -->
+    <div class="telemetry-grid reveal-item" data-delay="150">
+      <!-- Fuel Status Gauge -->
+      <div class="telemetry-card fuel-card">
+        <div class="telem-header">
+          <span class="telem-label">FUEL RESERVES</span>
+          <span class="telem-status" id="fuelStatus">NOMINAL</span>
+        </div>
+        <canvas id="fuelGauge" class="gauge-canvas" width="200" height="200" aria-label="Fuel reserves gauge"></canvas>
+        <div class="telem-readout">
+          <span id="fuelValue">87.3</span>
+          <span class="telem-unit">%</span>
+        </div>
+      </div>
+
+      <!-- Power Systems Gauge -->
+      <div class="telemetry-card power-card">
+        <div class="telem-header">
+          <span class="telem-label">POWER SYSTEMS</span>
+          <span class="telem-status" id="powerStatus">OPTIMAL</span>
+        </div>
+        <canvas id="powerGauge" class="gauge-canvas" width="200" height="200" aria-label="Power systems gauge"></canvas>
+        <div class="telem-readout">
+          <span id="powerValue">94.1</span>
+          <span class="telem-unit">%</span>
+        </div>
+      </div>
+
+      <!-- Comms Signal Gauge -->
+      <div class="telemetry-card comms-card">
+        <div class="telem-header">
+          <span class="telem-label">SIGNAL STRENGTH</span>
+          <span class="telem-status" id="commsStatus">LOCKED</span>
+        </div>
+        <canvas id="commsGauge" class="gauge-canvas" width="200" height="200" aria-label="Communications signal gauge"></canvas>
+        <div class="telem-readout">
+          <span id="commsValue">92.7</span>
+          <span class="telem-unit">dB</span>
+        </div>
+      </div>
+
+      <!-- Structural Integrity Gauge -->
+      <div class="telemetry-card integrity-card">
+        <div class="telem-header">
+          <span class="telem-label">STRUCTURAL INTEGRITY</span>
+          <span class="telem-status" id="integrityStatus">GREEN</span>
+        </div>
+        <canvas id="integrityGauge" class="gauge-canvas" width="200" height="200" aria-label="Structural integrity gauge"></canvas>
+        <div class="telem-readout">
+          <span id="integrityValue">99.8</span>
+          <span class="telem-unit">%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert Panel -->
+    <div class="telemetry-alerts reveal-item" data-delay="300">
+      <div class="alert-header">SYSTEM ALERTS &amp; NOTIFICATIONS</div>
+      <div class="alert-list">
+        <div class="alert-item alert-info">
+          <span class="alert-icon">⬤</span>
+          <span class="alert-text">T-1 minute: Main engine cutoff sequence initiated</span>
+          <span class="alert-time">2:47 UTC</span>
+        </div>
+        <div class="alert-item alert-warning">
+          <span class="alert-icon">⬤</span>
+          <span class="alert-text">Thermal coating stress at 78% — nominal for this phase</span>
+          <span class="alert-time">2:46 UTC</span>
+        </div>
+        <div class="alert-item alert-info">
+          <span class="alert-icon">⬤</span>
+          <span class="alert-text">Solar radiation event detected — magnetic shielding effective</span>
+          <span class="alert-time">2:44 UTC</span>
+        </div>
+        <div class="alert-item alert-ok">
+          <span class="alert-icon">✓</span>
+          <span class="alert-text">Crew biometrics: All nominal. Heart rates 60-75 bpm.</span>
+          <span class="alert-time">2:42 UTC</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Telemetry ambient glow -->
+  <div class="control-glow-1" aria-hidden="true"></div>
+  <div class="control-glow-2" aria-hidden="true"></div>
+</section>
+
+<!-- ---------------------------------------
+     SECTION 6 - LANDING
+--------------------------------------- -->
+<section id="s-landing" class="chapter dark-section" data-chapter="5">
+  <div class="landing-dust-l" aria-hidden="true"></div>
+  <div class="landing-dust-r" aria-hidden="true"></div>
+  <div class="mars-horizon" aria-hidden="true"></div>
+
+  <div class="landing-content">
+    <div class="landing-hero-text">
+      <span class="overline reveal-item" data-delay="0">DAY 207 - 14:32 UTC</span>
+      <h2 class="chapter-title landing-title reveal-item" data-delay="100">
+        <em>"Touchdown</em><br>Confirmed."
+      </h2>
+    </div>
+
+    <div class="landing-split">
+      <div class="edl-timeline reveal-item" data-delay="200">
+        <div class="edl-title">ENTRY - DESCENT - LANDING</div>
+        <div class="edl-item active" id="edl0">
+          <div class="edl-icon">ENTRY</div>
+          <div class="edl-time">E-7 min</div>
+          <div class="edl-desc"><strong>Atmospheric Entry</strong><br>Heat shield at 1,700-C. Comm blackout. 7 minutes of terror.</div>
+        </div>
+        <div class="edl-item" id="edl1">
+          <div class="edl-icon">CHUTE</div>
+          <div class="edl-time">E-4 min</div>
+          <div class="edl-desc"><strong>Parachute Deploy</strong><br>Supersonic chutes deployed at 400m/s. Deceleration begins.</div>
+        </div>
+        <div class="edl-item" id="edl2">
+          <div class="edl-icon">BURN</div>
+          <div class="edl-time">E-1 min</div>
+          <div class="edl-desc"><strong>Retro-burn</strong><br>Eight landing engines fire. Velocity drops from 300 to 2 m/s.</div>
+        </div>
+        <div class="edl-item" id="edl3">
+          <div class="edl-icon">LAND</div>
+          <div class="edl-time">E-0</div>
+          <div class="edl-desc"><strong>Touchdown - Jezero Crater</strong><br>"Touchdown confirmed. ARES-I is safe on the surface of Mars."</div>
+        </div>
+      </div>
+
+      <div class="landing-visual reveal-item" data-delay="300">
+        <div class="lander-scene">
+          <canvas id="landingCanvas" width="400" height="350" aria-label="Mars landing scene"></canvas>
+          <div class="lander-telemetry">
+            <div class="lt-row"><span>ALT</span><span id="ltAlt" class="lt-val">2400 m</span></div>
+            <div class="lt-row"><span>VEL</span><span id="ltVel" class="lt-val">280 m/s</span></div>
+            <div class="lt-row"><span>STATUS</span><span id="ltStatus" class="lt-val blink-green">NOMINAL</span></div>
+          </div>
+        </div>
+        <button class="edl-replay-btn" id="edlReplayBtn" aria-label="Replay landing sequence">
+          REPLAY SEQUENCE
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------------------------------------
+     SECTION 7 - SURFACE EXPLORATION
+--------------------------------------- -->
+<section id="s-explore" class="chapter dark-section" data-chapter="6">
+
+  <div class="explore-content">
+    <div class="explore-header">
+      <span class="overline reveal-item" data-delay="0">JEZERO CRATER - SOL 1</span>
+      <h2 class="chapter-title reveal-item" data-delay="100">
+        A New World<br><em>Begins Here.</em>
+      </h2>
+      <p class="chapter-body reveal-item" data-delay="200" style="max-width:640px">
+        The hatch opens. The first boot presses into rust-red soil. 
+        Gravity at 38% pulls gently. The sky is butterscotch at dawn, 
+        blue near the sun. Every breath is a miracle. 
+        Every step is a message to every human who ever looked up and dreamed.
+      </p>
+    </div>
+
+    <!-- Discovery cards grid -->
+    <div class="discovery-grid" id="discoveryGrid">
+      <div class="disc-card reveal-item" data-delay="100" tabindex="0" role="button" aria-label="Perchlorate Discovery">
+        <div class="dc-icon">CHEM</div>
+        <div class="dc-badge">SOL 3</div>
+        <h3 class="dc-title">Perchlorate Detected</h3>
+        <p class="dc-body">Soil chemistry analysis reveals perchlorate salts - the same compound that may enable microbial life in extreme environments on Earth.</p>
+        <div class="dc-expand">
+          <span>The rover drills 2m into regolith and extracts core samples for the onboard laboratory. Spectrometer results suggest subsurface brine.</span>
+        </div>
+        <div class="dc-toggle">READ MORE</div>
+      </div>
+
+      <div class="disc-card reveal-item" data-delay="200" tabindex="0" role="button" aria-label="Methane Spike Discovery">
+        <div class="dc-icon">GAS</div>
+        <div class="dc-badge">SOL 12</div>
+        <h3 class="dc-title">Methane Spike</h3>
+        <p class="dc-body">Atmospheric sensors detect a 21 ppb methane spike - 8x background levels. Source unknown. Biological origin cannot be ruled out.</p>
+        <div class="dc-expand">
+          <span>Methane on Mars is unstable - destroyed by UV within centuries. A fresh spike implies a recent source: volcanic, geological, or biological.</span>
+        </div>
+        <div class="dc-toggle">READ MORE</div>
+      </div>
+
+      <div class="disc-card reveal-item" data-delay="300" tabindex="0" role="button" aria-label="Ice Discovery">
+        <div class="dc-icon">ICE</div>
+        <div class="dc-badge">SOL 28</div>
+        <h3 class="dc-title">Subsurface Ice</h3>
+        <p class="dc-body">Ground-penetrating radar confirms a 15m layer of water ice at 20m depth beneath Jezero Crater - enough water to fill hundreds of Olympic pools.</p>
+        <div class="dc-expand">
+          <span>This changes everything. Water ice at accessible depth means fuel can be synthesised in situ. A permanent base just became viable.</span>
+        </div>
+        <div class="dc-toggle">READ MORE</div>
+      </div>
+
+      <div class="disc-card reveal-item" data-delay="400" tabindex="0" role="button" aria-label="Biosignature Discovery">
+        <div class="dc-icon">BIO</div>
+        <div class="dc-badge">SOL 45</div>
+        <h3 class="dc-title">Biosignature Candidate</h3>
+        <p class="dc-body">Microscopic structures in ancient lakebed sediment bear striking morphological resemblance to fossilised stromatolites on Earth. Analysis ongoing.</p>
+        <div class="dc-expand">
+          <span>Confirmation would be the greatest discovery in human history. The scientific community holds its breath. Repeat testing is underway.</span>
+        </div>
+        <div class="dc-toggle">READ MORE</div>
+      </div>
+    </div>
+
+    <!-- Final message -->
+    <div class="finale reveal-item" data-delay="200">
+      <div class="finale-quote">
+        <p>
+          "We came not as conquerors, but as curious animals from a pale blue dot - 
+          asking the oldest question life has ever asked: <em>are we alone?</em>"
+        </p>
+        <span class="fq-attr">- Commander Priya Nair, ARES-I Mission Log, Sol 1</span>
+      </div>
+      <div class="finale-stats">
+        <div class="fs-stat">
+          <span class="fs-num" data-target="207">0</span>
+          <span class="fs-label">Days in Transit</span>
+        </div>
+        <div class="fs-stat">
+          <span class="fs-num" data-target="225">0</span>
+          <span class="fs-label">Million km</span>
+        </div>
+        <div class="fs-stat">
+          <span class="fs-num" data-target="4">0</span>
+          <span class="fs-label">Lives Changed</span>
+        </div>
+        <div class="fs-stat">
+          <span class="fs-num" data-target="8">0</span>
+          <span class="fs-label">Billion Inspired</span>
+        </div>
+      </div>
+      <a href="#s-hero" class="cta-btn cta-return" aria-label="Return to beginning">
+        <span class="cta-label">RETURN TO EARTH</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Mars surface ground -->
+  <div class="mars-ground" aria-hidden="true">
+    <div class="mg-rock r1"></div>
+    <div class="mg-rock r2"></div>
+    <div class="mg-rock r3"></div>
+    <div class="mg-rock r4"></div>
+    <div class="mg-rock r5"></div>
+    <div class="dust-storm" id="dustStorm"></div>
+  </div>
+</section>
+
+<!-- ---------------------------------------
+     SECTION 8 - MISSION STRATEGY LAB
+--------------------------------------- -->
+<section id="s-lab" class="chapter dark-section" data-chapter="7">
+  <div class="lab-content">
+    <div class="lab-header reveal-item" data-delay="0">
+      <span class="overline">MISSION DESIGN CENTER</span>
+      <h2 class="chapter-title">Mission Strategy <em>Lab</em></h2>
+      <p class="chapter-body" style="max-width:760px">
+        Tune mission parameters and run a rapid Monte Carlo simulation. This what-if engine predicts mission duration,
+        landing confidence, crew stress, and science yield in real time.
+      </p>
+    </div>
+
+    <div class="lab-grid reveal-item" data-delay="150">
+      <div class="lab-controls">
+        <div class="lab-control">
+          <label for="labWindow">Launch Window Precision</label>
+          <input id="labWindow" type="range" min="50" max="100" value="82">
+          <span class="lab-value" id="labWindowVal">82%</span>
+        </div>
+        <div class="lab-control">
+          <label for="labFuel">Fuel Reserve Margin</label>
+          <input id="labFuel" type="range" min="10" max="60" value="34">
+          <span class="lab-value" id="labFuelVal">34%</span>
+        </div>
+        <div class="lab-control">
+          <label for="labShield">Radiation Shielding</label>
+          <input id="labShield" type="range" min="20" max="100" value="74">
+          <span class="lab-value" id="labShieldVal">74%</span>
+        </div>
+        <div class="lab-control">
+          <label for="labCrewLoad">Crew Workload Index</label>
+          <input id="labCrewLoad" type="range" min="20" max="100" value="58">
+          <span class="lab-value" id="labCrewLoadVal">58%</span>
+        </div>
+        <button id="labRunBtn" class="edl-replay-btn" type="button">RUN 10,000 SCENARIOS</button>
+      </div>
+
+      <div class="lab-results">
+        <canvas id="labTrajectoryCanvas" width="520" height="300" aria-label="Mission trajectory simulator"></canvas>
+        <div class="lab-metrics">
+          <div class="lab-metric"><span>ETA TO MARS</span><strong id="labEta">206 days</strong></div>
+          <div class="lab-metric"><span>SUCCESS PROBABILITY</span><strong id="labSuccess">87.4%</strong></div>
+          <div class="lab-metric"><span>SCIENCE YIELD INDEX</span><strong id="labScience">9.2 / 10</strong></div>
+          <div class="lab-metric"><span>CREW STRAIN INDEX</span><strong id="labRisk">LOW</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------------------------------------
+     ACCESSIBILITY SKIP LINK
+--------------------------------------- -->
+<a href="#s-hero" class="skip-link" aria-label="Skip to main content">Skip to content</a>
+
+<!-- ================================================
+     SECTION 10 - MISSION RESULTS & ANALYTICS
+================================================ -->
+<section id="s-results" class="chapter results-section" data-chapter="9">
+  <div class="results-bg" aria-hidden="true"></div>
+  
+  <div class="results-content">
+    <div class="results-header reveal-item" data-delay="0">
+      <span class="overline">MISSION COMPLETE</span>
+      <h2 class="chapter-title results-title">Final Analysis<br><em>Mission Report.</em></h2>
+      <div class="results-subtitle" id="missionOutcome">MISSION STATUS: LOADING</div>
+    </div>
+
+    <!-- Mission Overview -->
+    <div class="results-grid reveal-item" data-delay="150">
+      <!-- Success Metrics -->
+      <div class="results-card results-success">
+        <div class="rc-header">
+          <span class="rc-title">MISSION OUTCOME</span>
+          <span class="rc-icon">✓</span>
+        </div>
+        <div class="rc-large" id="successProbability">87.4%</div>
+        <div class="rc-label">Overall Success</div>
+        <div class="rc-bar">
+          <div class="rc-bar-fill" id="successBar"></div>
+        </div>
+      </div>
+
+      <!-- Crew Performance -->
+      <div class="results-card results-crew">
+        <div class="rc-header">
+          <span class="rc-title">CREW PERFORMANCE</span>
+          <span class="rc-icon">👥</span>
+        </div>
+        <div class="rc-stats" id="crewStats">
+          <div class="cs-row"><span>Commander</span><span class="cs-grade">A+</span></div>
+          <div class="cs-row"><span>Pilot</span><span class="cs-grade">A</span></div>
+          <div class="cs-row"><span>Scientist</span><span class="cs-grade">A+</span></div>
+          <div class="cs-row"><span>Engineer</span><span class="cs-grade">A</span></div>
+        </div>
+      </div>
+
+      <!-- Science Yield -->
+      <div class="results-card results-science">
+        <div class="rc-header">
+          <span class="rc-title">SCIENCE YIELD</span>
+          <span class="rc-icon">🔬</span>
+        </div>
+        <div class="rc-large" id="scienceScore">92</div>
+        <div class="rc-label">Discoveries / 100</div>
+        <div class="rc-discoveries">
+          <span class="discovery-tag" id="disc1">Perchlorate</span>
+          <span class="discovery-tag" id="disc2">Methane</span>
+          <span class="discovery-tag" id="disc3">Ice Deposit</span>
+          <span class="discovery-tag" id="disc4">Biosignature?</span>
+        </div>
+      </div>
+
+      <!-- Mission Timeline -->
+      <div class="results-card results-timeline">
+        <div class="rc-header">
+          <span class="rc-title">MISSION TIMELINE</span>
+          <span class="rc-icon">📅</span>
+        </div>
+        <div class="rc-stats">
+          <div class="cs-row"><span>Launch Date</span><span id="tlLaunch">2026-03-28</span></div>
+          <div class="cs-row"><span>Travel Duration</span><span id="tlDuration">207 days</span></div>
+          <div class="cs-row"><span>Landing Success</span><span id="tlLanding">SOL 1</span></div>
+          <div class="cs-row"><span>Mission End</span><span id="tlEnd">2026-11-21</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Achievements & Badges -->
+    <div class="results-achievements reveal-item" data-delay="250">
+      <div class="achievements-header">MISSION ACHIEVEMENTS UNLOCKED</div>
+      <div class="achievements-grid">
+        <div class="achievement-badge achieved" title="Launched successfully">
+          <div class="ab-icon">🚀</div>
+          <div class="ab-name">Launch Expert</div>
+        </div>
+        <div class="achievement-badge achieved" title="Completed crew biometrics">
+          <div class="ab-icon">❤</div>
+          <div class="ab-name">Steady Vitals</div>
+        </div>
+        <div class="achievement-badge achieved" title="Navigated approach">
+          <div class="ab-icon">🧭</div>
+          <div class="ab-name">Navigator</div>
+        </div>
+        <div class="achievement-badge achieved" title="Successful landing">
+          <div class="ab-icon">🏜</div>
+          <div class="ab-name">Soft Landing</div>
+        </div>
+        <div class="achievement-badge achieved" title="Made discoveries">
+          <div class="ab-icon">🔍</div>
+          <div class="ab-name">Discoverer</div>
+        </div>
+        <div class="achievement-badge achieved" title="Recovered from crisis">
+          <div class="ab-icon">⚡</div>
+          <div class="ab-name">Crisis Manager</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Post-Mission Analysis -->
+    <div class="results-analysis reveal-item" data-delay="300">
+      <div class="analysis-header">MISSION ANALYSIS & DECISIONS</div>
+      <div class="analysis-list" id="analysisLog">
+        <div class="analysis-item">Loading mission decisions...</div>
+      </div>
+    </div>
+
+    <div class="results-replay reveal-item" data-delay="320">
+      <div class="analysis-header">MISSION REPLAY TIMELINE</div>
+      <div class="replay-meta">
+        <span id="replayIndex">Event 0</span>
+        <span id="replayTotal">0 events</span>
+      </div>
+      <input id="replayScrubber" class="replay-scrubber" type="range" min="0" max="0" step="1" value="0" aria-label="Replay timeline scrubber">
+      <div class="replay-focus">
+        <div class="replay-title" id="replayTitle">Awaiting mission events...</div>
+        <div class="replay-time" id="replayTimestamp">T+00:00</div>
+        <div class="replay-detail" id="replayDetail">As the mission runs, key decisions and moments will appear here.</div>
+      </div>
+      <div class="replay-controls">
+        <button id="replayPrev" class="results-btn" type="button">PREV</button>
+        <button id="replayPlay" class="results-btn" type="button">AUTO PLAY</button>
+        <button id="replayNext" class="results-btn" type="button">NEXT</button>
+      </div>
+      <div class="replay-event-list" id="replayEvents"></div>
+    </div>
+
+    <!-- Share & Celebrate -->
+    <div class="results-footer reveal-item" data-delay="350">
+      <div class="footer-text">
+        <p>🌍 <strong>To everyone who dreamed:</strong></p>
+        <p>Today, we proved that with courage, collaboration, and curiosity, 
+        humanity can rise to extraordinary challenges. This is not the end. 
+        This is the beginning.</p>
+      </div>
+      <div class="footer-actions">
+        <button id="shareResultsBtn" class="results-btn results-share">
+          📤 SHARE RESULTS
+        </button>
+        <a href="#s-hero" class="results-btn results-restart">
+          🔄 RESTART MISSION
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<a href="#s-hero" class="skip-link" aria-label="Skip to main content">Skip to content</a>
+
+<script src="assets/js/main.js?v=20260328-2" defer></script>
+</body>
+</html>
+
+
+
+
