@@ -41,7 +41,7 @@ ARES-I is structured as a 10-chapter mission arc:
 - Fully responsive layout across mobile, tablet, and desktop
 - Accessibility support: ARIA labels, keyboard controls, reduced-motion compatibility
 
-## Mission Replay Timeline (Judge Favorite)
+## Mission Replay Timeline
 
 The replay panel captures key moments during a run:
 
