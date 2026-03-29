@@ -94,7 +94,6 @@ Judges can scrub through mission events and replay the story of a run in seconds
 This is a static project and can be deployed instantly to:
 
 - GitHub Pages
-- Vercel
 - Netlify
 
 ## Project Structure
