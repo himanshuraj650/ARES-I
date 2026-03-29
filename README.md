@@ -117,6 +117,6 @@ This is a static project and can be deployed instantly to:
 - Reduced motion support for accessibility preferences
 - Keyboard-friendly interaction in key sections
 
-## Team Pitch Summary
+## Summary
 
 ARES-I is not a static story page. It is a compact, interactive mission system that demonstrates product thinking, front-end engineering, and narrative experience design in one polished hackathon submission.
