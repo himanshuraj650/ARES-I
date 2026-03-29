@@ -2336,7 +2336,16 @@ body.tour-running {
   .finale-stats   { gap: 24px; }
   .fs-num         { font-size: 32px; }
   #side-nav       { display: none; }
-  .approach-data-strip { padding: 10px 16px; gap: 12px; }
+  #s-approach    { padding-bottom: 40px; }
+  .approach-data-strip {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    margin-top: 24px;
+    padding: 10px 16px;
+    gap: 12px;
+  }
   .ads-sep        { display: none; }
   .hero-title     { font-size: clamp(44px, 12vw, 80px); }
   .lab-metrics    { grid-template-columns: 1fr; }
@@ -2350,6 +2359,7 @@ body.tour-running {
   .finale-stats   { flex-direction: column; gap: 16px; }
   .launch-data-grid { grid-template-columns: 1fr; }
   .loader-hud     { padding: 20px; }
+  .approach-data-strip { margin-top: 18px; }
 }
 
 /* -----------------------------------------
